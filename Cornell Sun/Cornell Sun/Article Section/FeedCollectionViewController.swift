@@ -10,6 +10,7 @@ import UIKit
 import IGListKit
 import Realm
 import RealmSwift
+import Bayes
 
 class FeedCollectionViewController: ViewController, UIScrollViewDelegate {
     var feedData: [PostObject] = []
@@ -43,6 +44,74 @@ class FeedCollectionViewController: ViewController, UIScrollViewDelegate {
         adapter.scrollViewDelegate = self
         savedPosts = RealmManager.instance.get()
         getPosts(page: currentPage)
+
+        DispatchQueue.main.async {
+            print("Creating event space")
+            var eventSpace = EventSpace<String, String>()
+            let classificationDict = self.getDictionaryFromTextFile(fileName: "post_classifications") as? [String: String] ?? [:]
+            let trainingDataDict = self.getDictionaryFromTextFile(fileName: "training_data") as? [String: [String: Int]] ?? [:]
+            var trainingDict: [String: [String]] = [:]
+            var testingDict: [String: [String]] = [:]
+            let numTrainingEntries = trainingDataDict.keys.count
+            var count = 0.0
+            for article in trainingDataDict.keys {
+                let ageClassification: String = classificationDict[article] ?? ""
+                let wordCounts: [String: Int] = trainingDataDict[article] ?? [:]
+                var wordObservations: [String] = []
+                for word in wordCounts.keys {
+                    let numOccurrences = wordCounts[word] ?? 0
+                    for _ in 1...numOccurrences {
+                        wordObservations.append(word)
+                    }
+                }
+
+                if count < Double(numTrainingEntries) * 0.7 {
+                    // use for training
+                    trainingDict[article] = wordObservations
+                    eventSpace.observe(ageClassification, features: wordObservations)
+                } else {
+                    // use for testing
+                    testingDict[article] = wordObservations
+                }
+                count += 1
+            }
+
+            print("Num training entries: \(trainingDict.count)")
+            print("Num testing entries: \(testingDict.count)")
+
+            let classifier = BayesianClassifier(eventSpace: eventSpace)
+            var numCorrect = 0
+
+            for article in testingDict.keys {
+                let wordObservations = testingDict[article] ?? []
+                let wordClassification = classificationDict[article]
+                if classifier.classify(wordObservations) == wordClassification {
+                    numCorrect += 1
+                }
+            }
+
+            print("Number correct: \(numCorrect)")
+        }
+    }
+
+    func getDictionaryFromTextFile(fileName: String) -> [String: Any]? {
+        if let filepath = Bundle.main.path(forResource: fileName, ofType: "txt") {
+            do {
+                let jsonString = try String(contentsOfFile: filepath)
+                if let data = jsonString.data(using: .utf8) {
+                    do {
+                        return try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+                    } catch {
+                        print(error.localizedDescription)
+                    }
+                }
+            } catch {
+                // contents could not be loaded
+            }
+        } else {
+            // example.txt not found!
+        }
+        return [:]
     }
 
     override func viewDidLayoutSubviews() {

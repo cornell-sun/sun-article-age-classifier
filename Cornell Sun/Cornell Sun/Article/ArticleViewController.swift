@@ -74,6 +74,7 @@ class ArticleViewController: UIViewController {
         navigationItem.setRightBarButton(textSizeRightBarButtonItem, animated: true)
         setupViews()
         setupWithArticle()
+        fillFeatureDictionary()
     }
 
     @objc func toggleSize() {
@@ -192,31 +193,45 @@ extension ArticleViewController: UITableViewDelegate, UITableViewDataSource {
 }
 
 extension ArticleViewController {
-    
+
     func fillFeatureDictionary() {
+        print(self.post.content)
         // length of the article's title
         self.featureDict["titleLength"] = self.post.title.count
-        
+
         // category of the article -- could also trim this
         self.featureDict["category"] = self.post.categories
-        
+
         // tags
         self.featureDict["tags"] = self.post.tags
-        
+
         // content size -- could also sanitize the HTML
         self.featureDict["contentSize"] = self.post.content.count
-        
+
         // number of images associated with post
         self.featureDict["numImages"] = self.post.photoGalleryObjects.count
-        
+
         // primary category
         self.featureDict["primaryCategory"] = self.post.primaryCategory
-        
+
         // tokenized title to be implemented later
         //let tagger = NSLinguisticTagger(tagSchemes: [.tokenType, .nameTypeOrLexicalClass, .language], options: 0)
         //tagger.string = self.post.title
-        
-        //
-    
+
+        // average word length in title
+        var wordCount = 0
+
+        for word in self.post.title.components(separatedBy: " ") {
+            print(word)
+            wordCount += 1
+        }
+
+        self.featureDict["averageTitleWordLength"] = self.post.title.count / wordCount
+
+        // Title split on "|"
+        let pipeIndex = self.post.title.index(of: "|") ?? self.post.title.endIndex
+        print(self.post.title[..<pipeIndex])
+        self.featureDict["pipeTitle"] = self.post.title[..<pipeIndex].trimmingCharacters(in: .whitespacesAndNewlines)
+        print("Feature Dictionary: \(self.featureDict)")
     }
 }

@@ -25,6 +25,8 @@
 		5006B0031EA9625000F58549 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5006B0021EA9625000F58549 /* Assets.xcassets */; };
 		5006B24D1EADA37F00F58549 /* PostObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5006B24C1EADA37E00F58549 /* PostObject.swift */; };
 		50A898121EAEC93B0099CFA9 /* AuthorObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A898111EAEC93B0099CFA9 /* AuthorObject.swift */; };
+		611E72DA1FE082F9000FAC59 /* training_data.txt in Resources */ = {isa = PBXBuildFile; fileRef = 611E72D91FE082F8000FAC59 /* training_data.txt */; };
+		611E72DC1FE08612000FAC59 /* post_classifications.txt in Resources */ = {isa = PBXBuildFile; fileRef = 611E72DB1FE08611000FAC59 /* post_classifications.txt */; };
 		61652CD21F6EF3A500EEFC29 /* SearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61652CD11F6EF3A500EEFC29 /* SearchViewController.swift */; };
 		61652CD41F6EF44900EEFC29 /* SearchTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61652CD31F6EF44900EEFC29 /* SearchTableViewCell.swift */; };
 		DC0A883A1FBA2DEE00F2BCBB /* PhotoGalleryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0A88391FBA2DEE00F2BCBB /* PhotoGalleryCell.swift */; };
@@ -92,6 +94,8 @@
 		5006B00D1EA963A900F58549 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		5006B24C1EADA37E00F58549 /* PostObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PostObject.swift; path = "Cornell Sun/PostObject.swift"; sourceTree = "<group>"; };
 		50A898111EAEC93B0099CFA9 /* AuthorObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AuthorObject.swift; path = "Cornell Sun/AuthorObject.swift"; sourceTree = "<group>"; };
+		611E72D91FE082F8000FAC59 /* training_data.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = training_data.txt; sourceTree = "<group>"; };
+		611E72DB1FE08611000FAC59 /* post_classifications.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = post_classifications.txt; sourceTree = "<group>"; };
 		61652CD11F6EF3A500EEFC29 /* SearchViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchViewController.swift; sourceTree = "<group>"; };
 		61652CD31F6EF44900EEFC29 /* SearchTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchTableViewCell.swift; sourceTree = "<group>"; };
 		79D08546F469CBFA91B516C4 /* Pods-Cornell Sun.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Cornell Sun.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Cornell Sun/Pods-Cornell Sun.debug.xcconfig"; sourceTree = "<group>"; };
@@ -162,6 +166,8 @@
 		5006AFEF1EA9625000F58549 = {
 			isa = PBXGroup;
 			children = (
+				611E72D91FE082F8000FAC59 /* training_data.txt */,
+				611E72DB1FE08611000FAC59 /* post_classifications.txt */,
 				0C7D9A8D1F217B510041E1B0 /* apple-app-site-association */,
 				5006B00D1EA963A900F58549 /* Default-568h@2x.png */,
 				5006AFFA1EA9625000F58549 /* Cornell Sun */,
@@ -407,6 +413,8 @@
 				5006B0031EA9625000F58549 /* Assets.xcassets in Resources */,
 				DC818DA31F75E0CF0064AFFA /* Sonnenstrahl-Ausgezeichnet.ttf in Resources */,
 				DC6870041F7D77F700CE2E27 /* Launch Screen.storyboard in Resources */,
+				611E72DC1FE08612000FAC59 /* post_classifications.txt in Resources */,
+				611E72DA1FE082F9000FAC59 /* training_data.txt in Resources */,
 				0C7D9A8E1F217B510041E1B0 /* apple-app-site-association in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -502,6 +510,7 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Cornell Sun/Pods-Cornell Sun-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
+				"${BUILT_PRODUCTS_DIR}/Bayes/Bayes.framework",
 				"${BUILT_PRODUCTS_DIR}/FLAnimatedImage/FLAnimatedImage.framework",
 				"${BUILT_PRODUCTS_DIR}/HTMLString/HTMLString.framework",
 				"${BUILT_PRODUCTS_DIR}/IGListKit/IGListKit.framework",
@@ -520,6 +529,7 @@
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Bayes.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FLAnimatedImage.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/HTMLString.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IGListKit.framework",
