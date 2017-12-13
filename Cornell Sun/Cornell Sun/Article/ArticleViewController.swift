@@ -41,7 +41,7 @@ class ArticleViewController: UIViewController {
 
     // dictionary in the form [feature_name -> feature_value]
     var featureDict: [String: Any] = [:]
-    var classifer: BayesianClassifier<String, String>! = nil
+    var classifier: BayesianClassifier<String, String>! = nil
 
     // UI Components
     var articleScrollView: UIScrollView!
@@ -74,11 +74,109 @@ class ArticleViewController: UIViewController {
         navigationController?.navigationBar.tintColor = .black
         textSizeRightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "textSize"), style: .plain, target: self, action: #selector(toggleSize))
         navigationItem.setRightBarButton(textSizeRightBarButtonItem, animated: true)
-        setupViews()
-        setupWithArticle()
+//        setupViews()
+//        setupWithArticle()
         fillFeatureDictionary()
         let wordsArr = buildWordsArray()
-        print("This should be classified as: \(classifer.classify(wordsArr))")
+
+        let ageGroupLabel = UILabel()
+        ageGroupLabel.font = UIFont.systemFont(ofSize: 30)
+        ageGroupLabel.textAlignment = .center
+        guard let category = classifier.classify(wordsArr) else { return }
+        ageGroupLabel.text = "Most likely age group: \(category)"
+        view.addSubview(ageGroupLabel)
+        ageGroupLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
+
+        let probabilitiesLabel = UILabel()
+        probabilitiesLabel.textAlignment = .center
+        probabilitiesLabel.text = "Top 5 words: \n"
+        probabilitiesLabel.numberOfLines = 6
+        view.addSubview(probabilitiesLabel)
+        probabilitiesLabel.snp.makeConstraints { make in
+            make.centerX.equalToSuperview()
+            make.top.equalTo(ageGroupLabel.snp.bottom).offset(15)
+        }
+
+        var youngWords: [(word: String, weight: Double)] = []
+        var midWords: [(word: String, weight: Double)] = []
+        var oldWords: [(word: String, weight: Double)] = []
+        var wordsSet = Set<String>()
+
+        for word in wordsArr {
+            wordsSet.insert(word)
+        }
+
+        for word in wordsSet {
+            let youngWeight = self.classifier.eventSpace.P(word, givenCategory: "18-24")
+            let midWeight = self.classifier.eventSpace.P(word, givenCategory: "25-44")
+            let oldWeight = self.classifier.eventSpace.P(word, givenCategory: "45+")
+            youngWords.append((word, youngWeight))
+            midWords.append((word, midWeight))
+            oldWords.append((word, oldWeight))
+        }
+
+        let youngWordsSorted: [(word: String, weight: Double)] = youngWords.sorted(by: { $0.weight > $1.weight })
+        let midWordsSorted: [(word: String, weight: Double)] = midWords.sorted(by: { $0.weight > $1.weight })
+        let oldWordsSorted: [(word: String, weight: Double)] = oldWords.sorted(by: { $0.weight > $1.weight })
+
+        var youngWordIndicies: [String: Int] = [:]
+        var midWordIndicies: [String: Int] = [:]
+        var oldWordIndicies: [String: Int] = [:]
+
+        for index in 0..<youngWordsSorted.count {
+            let (youngWord, _) = youngWordsSorted[index]
+            let (midWord, _) = midWordsSorted[index]
+            let (oldWord, _) = oldWordsSorted[index]
+
+            youngWordIndicies[youngWord] = index
+            midWordIndicies[midWord] = index
+            oldWordIndicies[oldWord] = index
+        }
+
+        var counter = 0
+        if category == "18-24" {
+            for (word, weight) in youngWordsSorted {
+                let midIndex = midWordIndicies[word] ?? -1
+                let oldIndex = oldWordIndicies[word] ?? -1
+                if weight - midWordsSorted[midIndex].weight - oldWordsSorted[oldIndex].weight > 0.05 && counter < 5 {
+                    probabilitiesLabel.text = probabilitiesLabel.text! + "\(word): \(weight)\n"
+                    counter += 1
+                }
+            }
+        } else if category == "25-44" {
+            for (word, weight) in midWordsSorted {
+                let youngIndex = youngWordIndicies[word] ?? -1
+                let oldIndex = oldWordIndicies[word] ?? -1
+                if weight - youngWordsSorted[youngIndex].weight - oldWordsSorted[oldIndex].weight > 0.05 && counter < 5 {
+                    probabilitiesLabel.text = probabilitiesLabel.text! + "\(word): \(weight)\n"
+                    counter += 1
+                }
+            }
+        } else if category == "45+" {
+            for (word, weight) in oldWordsSorted {
+                let youngIndex = youngWordIndicies[word] ?? -1
+                let midIndex = midWordIndicies[word] ?? -1
+                if weight - youngWordsSorted[youngIndex].weight - midWordsSorted[midIndex].weight > 0.05 && counter < 5 {
+                    probabilitiesLabel.text = probabilitiesLabel.text! + "\(word): \(weight)\n"
+                    counter += 1
+                }
+            }
+        }
+
+
+
+//        var counter = 0
+//        for (word, weight) in wordProbsSorted {
+//            if counter < wordProbsSorted.count || counter < 4 {
+//                probabilitiesLabel.text = probabilitiesLabel.text! + "\(word) : \(weight)\n"
+//                counter += 1
+//            }
+//        }
+
+//        print("This should be classified as: \(classifier.classify(wordsArr))")
+
     }
 
     @objc func toggleSize() {
