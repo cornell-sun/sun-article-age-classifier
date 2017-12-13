@@ -8,6 +8,7 @@
 
 import UIKit
 import HTMLString
+import Bayes
 
 enum FontSize {
     case regular
@@ -37,9 +38,10 @@ class ArticleViewController: UIViewController {
 
     var post: PostObject!
     var comments: [CommentObject]! = []
-    
+
     // dictionary in the form [feature_name -> feature_value]
     var featureDict: [String: Any] = [:]
+    var classifer: BayesianClassifier<String, String>! = nil
 
     // UI Components
     var articleScrollView: UIScrollView!
@@ -75,6 +77,8 @@ class ArticleViewController: UIViewController {
         setupViews()
         setupWithArticle()
         fillFeatureDictionary()
+        let wordsArr = buildWordsArray()
+        print("This should be classified as: \(classifer.classify(wordsArr))")
     }
 
     @objc func toggleSize() {
@@ -193,6 +197,14 @@ extension ArticleViewController: UITableViewDelegate, UITableViewDataSource {
 }
 
 extension ArticleViewController {
+
+    func buildWordsArray() -> [String] {
+        var wordObservations: [String] = []
+        for word in post.content.components(separatedBy: " ") {
+            wordObservations.append(word.trimmingCharacters(in: .whitespacesAndNewlines))
+        }
+        return wordObservations
+    }
 
     func fillFeatureDictionary() {
         print(self.post.content)

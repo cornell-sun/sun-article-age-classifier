@@ -16,6 +16,7 @@ class FeedCollectionViewController: ViewController, UIScrollViewDelegate {
     var feedData: [PostObject] = []
     var firstPostObject: PostObject!
     var savedPosts: Results<PostObject>!
+    var classifier: BayesianClassifier<String, String>!
     var currentPage = 1
     var loading = false
     let spinToken = "spinner"
@@ -53,7 +54,16 @@ class FeedCollectionViewController: ViewController, UIScrollViewDelegate {
             var trainingDict: [String: [String]] = [:]
             var testingDict: [String: [String]] = [:]
             let numTrainingEntries = trainingDataDict.keys.count
+            var wordsSet: Set<String> = []
             var count = 0.0
+            var numYoungPeople = 0
+            for article in trainingDataDict.keys where classificationDict[article] == "18-24" {
+                numYoungPeople += 1
+            }
+
+            print("Total training data entries: \(trainingDataDict.count)")
+            print("Total 18-24 classifications: \(numYoungPeople)")
+            
             for article in trainingDataDict.keys {
                 let ageClassification: String = classificationDict[article] ?? ""
                 let wordCounts: [String: Int] = trainingDataDict[article] ?? [:]
@@ -61,6 +71,7 @@ class FeedCollectionViewController: ViewController, UIScrollViewDelegate {
                 for word in wordCounts.keys {
                     let numOccurrences = wordCounts[word] ?? 0
                     for _ in 1...numOccurrences {
+                        wordsSet.insert(word)
                         wordObservations.append(word)
                     }
                 }
@@ -79,18 +90,76 @@ class FeedCollectionViewController: ViewController, UIScrollViewDelegate {
             print("Num training entries: \(trainingDict.count)")
             print("Num testing entries: \(testingDict.count)")
 
-            let classifier = BayesianClassifier(eventSpace: eventSpace)
+            self.classifier = BayesianClassifier(eventSpace: eventSpace)
             var numCorrect = 0
 
             for article in testingDict.keys {
                 let wordObservations = testingDict[article] ?? []
                 let wordClassification = classificationDict[article]
-                if classifier.classify(wordObservations) == wordClassification {
+                if self.classifier.classify(wordObservations) == wordClassification {
                     numCorrect += 1
                 }
             }
 
             print("Number correct: \(numCorrect)")
+
+            var youngWords: [(word: String, weight: Double)] = []
+            var midWords: [(word: String, weight: Double)] = []
+            var oldWords: [(word: String, weight: Double)] = []
+
+            for word in wordsSet {
+                let youngWeight = self.classifier.eventSpace.P(word, givenCategory: "18-24")
+                let midWeight = self.classifier.eventSpace.P(word, givenCategory: "25-44")
+                let oldWeight = self.classifier.eventSpace.P(word, givenCategory: "45+")
+                youngWords.append((word, youngWeight))
+                midWords.append((word, midWeight))
+                oldWords.append((word, oldWeight))
+            }
+
+            let youngWordsSorted: [(word: String, weight: Double)] = youngWords.sorted(by: { $0.weight > $1.weight })
+            let midWordsSorted: [(word: String, weight: Double)] = midWords.sorted(by: { $0.weight > $1.weight })
+            let oldWordsSorted: [(word: String, weight: Double)] = oldWords.sorted(by: { $0.weight > $1.weight })
+
+            var youngWordIndicies: [String: Int] = [:]
+            var midWordIndicies: [String: Int] = [:]
+            var oldWordIndicies: [String: Int] = [:]
+
+            for index in 0..<youngWordsSorted.count {
+                let (youngWord, _) = youngWordsSorted[index]
+                let (midWord, _) = midWordsSorted[index]
+                let (oldWord, _) = oldWordsSorted[index]
+
+                youngWordIndicies[youngWord] = index
+                midWordIndicies[midWord] = index
+                oldWordIndicies[oldWord] = index
+            }
+
+            print("------POPULAR YOUNG WORDS-----")
+            for (word, weight) in youngWordsSorted {
+                let midIndex = midWordIndicies[word] ?? -1
+                let oldIndex = oldWordIndicies[word] ?? -1
+                if weight - midWordsSorted[midIndex].weight - oldWordsSorted[oldIndex].weight > 0.1 {
+                    print((word, weight))
+                }
+            }
+
+            print("------POPULAR MID WORDS-----")
+            for (word, weight) in midWordsSorted {
+                let youngIndex = youngWordIndicies[word] ?? -1
+                let oldIndex = oldWordIndicies[word] ?? -1
+                if weight - youngWordsSorted[youngIndex].weight - oldWordsSorted[oldIndex].weight > 0.1 {
+                    print((word, weight))
+                }
+            }
+
+            print("------POPULAR OLD WORDS-----")
+            for (word, weight) in oldWordsSorted {
+                let youngIndex = youngWordIndicies[word] ?? -1
+                let midIndex = midWordIndicies[word] ?? -1
+                if weight - youngWordsSorted[youngIndex].weight - midWordsSorted[midIndex].weight > 0.1 {
+                    print((word, weight))
+                }
+            }
         }
     }
 
@@ -195,6 +264,7 @@ extension FeedCollectionViewController: ListAdapterDataSource {
 extension FeedCollectionViewController: TabBarViewControllerDelegate {
     func articleSectionDidPressOnArticle(_ article: PostObject) {
         let articleVC = ArticleViewController(article: article)
+        articleVC.classifer = self.classifier
         articleVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(articleVC, animated: true)
     }
