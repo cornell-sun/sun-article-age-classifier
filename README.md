@@ -1,5 +1,5 @@
 # Cornell Sun Article Age Classification
-Naïve Bayes classifier client for predicting reader age on articles. This repo is also part of our final project for CS 4701: Practicum in Artificial Intelligence. See the other [repo on how we parsed our data](https://github.com/cornell-sun/sun-classifier-training-data).
+Naïve Bayes classifier client for predicting reader age on articles. This repo is also part of our final project for CS 4701: Practicum in Artificial Intelligence. See the other [repo on how we parsed our data](https://github.com/cornell-sun/sun-classifier-training-data). For a more detailed look into our project, feel free to see our [presentation slide deck](https://github.com/cornell-sun/sun-article-age-classifier/blob/master/_readme/classification_slides.pdf) or our [full technical report](https://github.com/cornell-sun/sun-article-age-classifier/blob/master/_readme/CS%204701%20Writeup.pdf).
 
 ### Team
 - Chris Sciavolino ([@cdsciavolino](https://github.com/cdsciavolino))
